@@ -122,6 +122,8 @@ const joinRoom = (socket, roomId = 'default') => {
   // Default room is private - don't notify other users when someone joins/leaves
   if (roomId !== 'default') {
     socket.to(actualRoomId).emit('userJoined', { userCount });
+    // Request canvas state from other users in the room for collaborative rooms
+    socket.to(actualRoomId).emit('requestCanvasState', { requesterId: socket.id });
   }
   
   console.log(`Socket ${socket.id} joined room ${actualRoomId} (display: ${roomId}, ${userCount} users). Total rooms: ${rooms.size}`);
@@ -297,6 +299,42 @@ io.on("connection", (socket) => {
         socket.to(socket.roomId).emit('clearCanvas');
       } catch (error) {
         console.error('Error in clearCanvas:', error);
+      }
+    }));
+
+    // Request canvas state from other users (when joining a room)
+    socket.on('requestCanvasState', () => {
+      try {
+        // Default room is private - no remote access/collaboration
+        if (socket.roomId === 'default' || (socket.roomId && socket.roomId.startsWith('default_'))) {
+          return;
+        }
+        
+        // Broadcast request to other users in the room
+        socket.to(socket.roomId).emit('requestCanvasState', { requesterId: socket.id });
+      } catch (error) {
+        console.error('Error in requestCanvasState:', error);
+      }
+    });
+
+    // Send canvas state to requester (when another user requests it)
+    socket.on('sendCanvasState', withRateLimit('sendCanvasState', (data) => {
+      try {
+        // Default room is private - no remote access/collaboration
+        if (socket.roomId === 'default' || (socket.roomId && socket.roomId.startsWith('default_'))) {
+          return;
+        }
+        
+        // Validate canvas state data
+        if (data && data.canvasState && typeof data.canvasState === 'string' && data.requesterId) {
+          // Send canvas state to the requester
+          io.to(data.requesterId).emit('canvasStateReceived', { 
+            canvasState: data.canvasState, 
+            roomId: socket.displayRoomId || socket.roomId 
+          });
+        }
+      } catch (error) {
+        console.error('Error in sendCanvasState:', error);
       }
     }));
 
