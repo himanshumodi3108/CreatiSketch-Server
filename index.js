@@ -126,7 +126,7 @@ const joinRoom = (socket, roomId = 'default') => {
     socket.to(actualRoomId).emit('requestCanvasState', { requesterId: socket.id });
   }
   
-  console.log(`Socket ${socket.id} joined room ${actualRoomId} (display: ${roomId}, ${userCount} users). Total rooms: ${rooms.size}`);
+  // console.log(`Socket ${socket.id} joined room ${actualRoomId} (display: ${roomId}, ${userCount} users). Total rooms: ${rooms.size}`);
   
   return actualRoomId;
 };
@@ -151,7 +151,7 @@ const leaveRoom = (socket) => {
 };
 
 io.on("connection", (socket) => {
-    console.log(`Client connected: ${socket.id}`);
+    // console.log(`Client connected: ${socket.id}`);
     
     // Initialize default room if it doesn't exist
     if (!rooms.has('default')) {
@@ -204,7 +204,7 @@ io.on("connection", (socket) => {
         
         socket.to(socket.roomId).emit('beginPath', pathData);
       } catch (error) {
-        console.error('Error in beginPath:', error);
+        // console.error('Error in beginPath:', error);
       }
     }));
 
@@ -226,7 +226,7 @@ io.on("connection", (socket) => {
           y: data.y
         });
       } catch (error) {
-        console.error('Error in drawLine:', error);
+        // console.error('Error in drawLine:', error);
       }
     }));
 
@@ -248,7 +248,7 @@ io.on("connection", (socket) => {
         
         socket.to(socket.roomId).emit('changeConfig', config);
       } catch (error) {
-        console.error('Error in changeConfig:', error);
+        // console.error('Error in changeConfig:', error);
       }
     }));
 
@@ -283,7 +283,7 @@ io.on("connection", (socket) => {
         
         socket.to(socket.roomId).emit('drawShape', shapeData);
       } catch (error) {
-        console.error('Error in drawShape:', error);
+        // console.error('Error in drawShape:', error);
       }
     }));
 
@@ -298,7 +298,7 @@ io.on("connection", (socket) => {
         
         socket.to(socket.roomId).emit('clearCanvas');
       } catch (error) {
-        console.error('Error in clearCanvas:', error);
+        // console.error('Error in clearCanvas:', error);
       }
     }));
 
@@ -313,7 +313,7 @@ io.on("connection", (socket) => {
         // Broadcast request to other users in the room
         socket.to(socket.roomId).emit('requestCanvasState', { requesterId: socket.id });
       } catch (error) {
-        console.error('Error in requestCanvasState:', error);
+        // console.error('Error in requestCanvasState:', error);
       }
     });
 
@@ -334,7 +334,7 @@ io.on("connection", (socket) => {
           });
         }
       } catch (error) {
-        console.error('Error in sendCanvasState:', error);
+        // console.error('Error in sendCanvasState:', error);
       }
     }));
 
@@ -364,7 +364,7 @@ io.on("connection", (socket) => {
         
         joinRoom(socket, sanitizedRoomId);
       } catch (error) {
-        console.error('Error in joinRoom:', error);
+        // console.error('Error in joinRoom:', error);
         socket.emit('roomError', { message: 'Failed to join room' });
       }
     }));
@@ -378,7 +378,7 @@ io.on("connection", (socket) => {
           joinRoom(socket, 'default');
         }
       } catch (error) {
-        console.error('Error in leaveRoom:', error);
+        // console.error('Error in leaveRoom:', error);
         socket.emit('roomError', { message: 'Failed to leave room' });
       }
     });
@@ -404,21 +404,21 @@ io.on("connection", (socket) => {
         
         socket.emit('roomsList', { rooms: availableRooms });
       } catch (error) {
-        console.error('Error in getRooms:', error);
+        // console.error('Error in getRooms:', error);
         socket.emit('roomsList', { rooms: [] });
       }
     });
 
     // Disconnect handler
     socket.on('disconnect', () => {
-      console.log(`Client disconnected: ${socket.id}`);
+      // console.log(`Client disconnected: ${socket.id}`);
       leaveRoom(socket);
       rateLimitMap.delete(socket.id);
     });
 
     // Error handler
     socket.on('error', (error) => {
-      console.error(`Socket error for ${socket.id}:`, error);
+      // console.error(`Socket error for ${socket.id}:`, error);
     });
 });
 
@@ -433,20 +433,20 @@ app.get('/health', (req, res) => {
 });
 
 httpServer.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`CORS enabled for: ${CLIENT_URL}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  // console.log(`Server running on port ${PORT}`);
+  // console.log(`CORS enabled for: ${CLIENT_URL}`);
+  // console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 }).on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
-    console.error(`\n❌ Port ${PORT} is already in use.`);
-    console.error(`Please either:`);
-    console.error(`  1. Stop the process using port ${PORT}`);
-    console.error(`  2. Change the PORT in your .env file`);
-    console.error(`\nTo find and kill the process:`);
-    console.error(`  Windows: netstat -ano | findstr :${PORT}`);
-    console.error(`  Then: taskkill /PID <PID> /F`);
+    // console.error(`\n❌ Port ${PORT} is already in use.`);
+    // console.error(`Please either:`);
+    // console.error(`  1. Stop the process using port ${PORT}`);
+    // console.error(`  2. Change the PORT in your .env file`);
+    // console.error(`\nTo find and kill the process:`);
+    // console.error(`  Windows: netstat -ano | findstr :${PORT}`);
+    // console.error(`  Then: taskkill /PID <PID> /F`);
   } else {
-    console.error('Server error:', err);
+    // console.error('Server error:', err);
   }
   process.exit(1);
 });
